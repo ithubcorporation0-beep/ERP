@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (auth()->check()) {
-        return redirect()->route('dashboard');
+        return redirect()->route(Roles::dashboardRouteFor(auth()->user()));
     }
 
     return view('welcome');
@@ -14,6 +15,42 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::SUPER_ADMIN])
+    ->prefix('super')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.super'))->name('roles.super');
+    });
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.admin'))->name('roles.admin');
+    });
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::MANAGER.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
+    ->prefix('manager')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.manager'))->name('roles.manager');
+    });
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::ACCOUNTANT.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
+    ->prefix('accountant')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.accountant'))->name('roles.accountant');
+    });
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::EMPLOYEE.'|'.Roles::MANAGER.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
+    ->prefix('employee')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.employee'))->name('roles.employee');
+    });
+
+Route::middleware(['auth', 'verified', 'role:'.Roles::CLIENT])
+    ->prefix('client')
+    ->group(function () {
+        Route::get('/', fn () => view('roles.client'))->name('roles.client');
+    });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
