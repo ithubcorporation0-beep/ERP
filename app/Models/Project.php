@@ -55,4 +55,9 @@ class Project extends Model
             ->withPivot('id', 'role')
             ->withTimestamps();
     }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
 }

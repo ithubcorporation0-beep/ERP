@@ -68,4 +68,15 @@ class User extends Authenticatable
             ->withPivot('id', 'role')
             ->withTimestamps();
     }
+
+    /**
+     * Tasks this user is assigned to.
+     */
+    public function assignedTasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_assignees')
+            ->using(TaskAssignee::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
 }

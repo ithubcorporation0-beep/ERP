@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Customer;
 use App\Models\Project;
+use App\Models\Task;
 
 class ErpNavigation
 {
@@ -22,7 +23,7 @@ class ErpNavigation
             ['label' => 'Dashboard', 'route' => 'dashboard'],
             ['label' => 'Customers', 'route' => 'customers.index', 'gate' => 'viewAny', 'gate_arg' => Customer::class],
             ['label' => 'Projects', 'route' => 'projects.index', 'gate' => 'viewAny', 'gate_arg' => Project::class],
-            ['label' => 'Tasks', 'route' => 'tasks.index'],
+            ['label' => 'Tasks', 'route' => 'tasks.index', 'gate' => 'viewAny', 'gate_arg' => Task::class],
             ['label' => 'Invoices', 'route' => 'invoices.index'],
             ['label' => 'Payments', 'route' => 'payments.index'],
             ['label' => 'Expenses', 'route' => 'expenses.index'],

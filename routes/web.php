@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
 
@@ -66,9 +67,17 @@ Route::middleware(['auth', 'verified'])->prefix('projects/{project}/members')->n
     Route::delete('/{member}', [ProjectController::class, 'removeMember'])->name('destroy');
 });
 
+Route::resource('tasks', TaskController::class)
+    ->middleware(['auth', 'verified']);
+
+Route::middleware(['auth', 'verified'])->prefix('tasks/{task}')->name('tasks.')->group(function () {
+    Route::patch('/status', [TaskController::class, 'updateStatus'])->name('status.update');
+    Route::post('/assignees', [TaskController::class, 'addAssignee'])->name('assignees.store');
+    Route::delete('/assignees/{user}', [TaskController::class, 'removeAssignee'])->name('assignees.destroy');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'tasks' => 'Tasks',
         'invoices' => 'Invoices',
         'payments' => 'Payments',
         'expenses' => 'Expenses',

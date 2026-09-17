@@ -6,9 +6,15 @@
             </h2>
 
             <div class="flex items-center gap-4">
+                @can('create', \App\Models\Task::class)
+                    <a href="{{ route('tasks.create', ['project_id' => $project->id]) }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        {{ __('New Task') }}
+                    </a>
+                @endcan
                 @can('update', $project)
                     <a href="{{ route('projects.edit', $project) }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
                         {{ __('Edit') }}
                     </a>
                 @endcan
@@ -139,6 +145,38 @@
                         <x-primary-button type="submit">{{ __('Add') }}</x-primary-button>
                     </form>
                 @endcan
+            </div>
+
+            {{-- Tasks --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">{{ __('Tasks') }}</h3>
+
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Title') }}</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Priority') }}</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Due') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($project->tasks as $task)
+                            <tr>
+                                <td class="px-3 py-2 text-sm text-gray-900">
+                                    <a href="{{ route('tasks.show', $task) }}" class="hover:underline">{{ $task->title }}</a>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-500">{{ $task->status->label() }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-500">{{ $task->priority->label() }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-500">{{ optional($task->due_date)->format('Y-m-d') ?? '—' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-3 py-2 text-sm text-gray-500">{{ __('No tasks yet.') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\ProjectMemberRole;
 use App\Enums\ProjectStatus;
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\User;
@@ -13,8 +15,9 @@ use Illuminate\Database\Seeder;
 class DemoProjectsSeeder extends Seeder
 {
     /**
-     * Seed demo customers, projects, and project members for local
-     * development. Skipped outside the local environment.
+     * Seed demo customers, projects, project members, and tasks (with at
+     * least one assigned to the demo EMPLOYEE) for local development.
+     * Skipped outside the local environment.
      */
     public function run(): void
     {
@@ -66,6 +69,25 @@ class DemoProjectsSeeder extends Seeder
 
             $project->members()->firstOrCreate(['user_id' => $manager->id], ['role' => ProjectMemberRole::OWNER->value]);
             $project->members()->firstOrCreate(['user_id' => $employee->id], ['role' => ProjectMemberRole::CONTRIBUTOR->value]);
+        }
+
+        $websiteRedesign = Project::where('code', 'DEMO-1')->firstOrFail();
+
+        $tasks = [
+            ['title' => 'Build homepage', 'status' => TaskStatus::IN_PROGRESS, 'priority' => TaskPriority::HIGH],
+            ['title' => 'Set up staging environment', 'status' => TaskStatus::TODO, 'priority' => TaskPriority::MEDIUM],
+            ['title' => 'Client kickoff call', 'status' => TaskStatus::DONE, 'priority' => TaskPriority::LOW],
+        ];
+
+        foreach ($tasks as $attributes) {
+            $task = $websiteRedesign->tasks()->firstOrCreate(
+                ['title' => $attributes['title']],
+                $attributes
+            );
+
+            if ($attributes['title'] === 'Build homepage') {
+                $task->assignees()->syncWithoutDetaching([$employee->id]);
+            }
         }
     }
 }
