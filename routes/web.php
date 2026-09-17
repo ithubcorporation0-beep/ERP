@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TaskController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +77,14 @@ Route::middleware(['auth', 'verified'])->prefix('tasks/{task}')->name('tasks.')-
     Route::post('/assignees', [TaskController::class, 'addAssignee'])->name('assignees.store');
     Route::delete('/assignees/{user}', [TaskController::class, 'removeAssignee'])->name('assignees.destroy');
 });
+
+Route::resource('services', ServiceController::class)
+    ->except('show')
+    ->middleware(['auth', 'verified']);
+
+Route::resource('products', ProductController::class)
+    ->except('show')
+    ->middleware(['auth', 'verified']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [

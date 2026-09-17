@@ -3,7 +3,9 @@
 namespace App\Support;
 
 use App\Models\Customer;
+use App\Models\Product;
 use App\Models\Project;
+use App\Models\Service;
 use App\Models\Task;
 
 class ErpNavigation
@@ -24,6 +26,8 @@ class ErpNavigation
             ['label' => 'Customers', 'route' => 'customers.index', 'gate' => 'viewAny', 'gate_arg' => Customer::class],
             ['label' => 'Projects', 'route' => 'projects.index', 'gate' => 'viewAny', 'gate_arg' => Project::class],
             ['label' => 'Tasks', 'route' => 'tasks.index', 'gate' => 'viewAny', 'gate_arg' => Task::class],
+            ['label' => 'Services', 'route' => 'services.index', 'gate' => 'viewAny', 'gate_arg' => Service::class],
+            ['label' => 'Products', 'route' => 'products.index', 'gate' => 'viewAny', 'gate_arg' => Product::class],
             ['label' => 'Invoices', 'route' => 'invoices.index'],
             ['label' => 'Payments', 'route' => 'payments.index'],
             ['label' => 'Expenses', 'route' => 'expenses.index'],
