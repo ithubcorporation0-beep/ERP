@@ -19,7 +19,7 @@
                                 @cannot($item['gate']) ... show a disabled/locked state ... @endcannot
                         --}}
                         @if (isset($item['gate']))
-                            @can($item['gate'])
+                            @can($item['gate'], $item['gate_arg'] ?? null)
                                 <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
                                     {{ __($item['label']) }}
                                 </x-nav-link>
@@ -84,7 +84,7 @@
         <div class="pt-2 pb-3 space-y-1">
             @foreach (\App\Support\ErpNavigation::items() as $item)
                 @if (isset($item['gate']))
-                    @can($item['gate'])
+                    @can($item['gate'], $item['gate_arg'] ?? null)
                         <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
                             {{ __($item['label']) }}
                         </x-responsive-nav-link>

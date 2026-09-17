@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -52,9 +53,11 @@ Route::middleware(['auth', 'verified', 'role:'.Roles::CLIENT])
         Route::get('/', fn () => view('roles.client'))->name('roles.client');
     });
 
+Route::resource('customers', CustomerController::class)
+    ->middleware(['auth', 'verified']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'customers' => 'Customers',
         'projects' => 'Projects',
         'tasks' => 'Tasks',
         'invoices' => 'Invoices',
