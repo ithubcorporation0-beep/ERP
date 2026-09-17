@@ -7,8 +7,9 @@ class ErpNavigation
     /**
      * The ERP's primary navigation items.
      *
-     * Every authenticated user sees the full list for now; role-based
-     * visibility will filter this array once RBAC lands.
+     * Items with a 'gate' key are only shown when the current user passes
+     * that Gate (checked in the Blade view with @can). Everything else is
+     * visible to any authenticated user for now.
      */
     public static function items(): array
     {
@@ -21,8 +22,8 @@ class ErpNavigation
             ['label' => 'Payments', 'route' => 'payments.index'],
             ['label' => 'Expenses', 'route' => 'expenses.index'],
             ['label' => 'Documents', 'route' => 'documents.index'],
-            ['label' => 'Users', 'route' => 'users.index'],
-            ['label' => 'Settings', 'route' => 'settings.index'],
+            ['label' => 'Users', 'route' => 'users.index', 'gate' => 'viewAdmin'],
+            ['label' => 'Settings', 'route' => 'settings.index', 'gate' => 'viewAdmin'],
         ];
     }
 }

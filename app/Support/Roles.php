@@ -47,12 +47,27 @@ class Roles
      */
     public static function dashboardRouteFor(\App\Models\User $user): string
     {
+        $role = self::highestRoleFor($user);
+
+        return $role ? self::DASHBOARD_ROUTES[$role] : 'dashboard';
+    }
+
+    /**
+     * The user's highest-privilege role name, or null if they are a guest
+     * or have no role assigned.
+     */
+    public static function highestRoleFor(?\App\Models\User $user): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
         foreach (self::ALL as $role) {
             if ($user->hasRole($role)) {
-                return self::DASHBOARD_ROUTES[$role];
+                return $role;
             }
         }
 
-        return 'dashboard';
+        return null;
     }
 }

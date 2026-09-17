@@ -13,9 +13,22 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-6 sm:-my-px sm:ms-10 sm:flex">
                     @foreach (\App\Support\ErpNavigation::items() as $item)
-                        <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
-                            {{ __($item['label']) }}
-                        </x-nav-link>
+                        {{--
+                            Items with a 'gate' key (e.g. Users, Settings) only render for users
+                            who pass that Gate. The inverse check reads:
+                                @cannot($item['gate']) ... show a disabled/locked state ... @endcannot
+                        --}}
+                        @if (isset($item['gate']))
+                            @can($item['gate'])
+                                <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
+                                    {{ __($item['label']) }}
+                                </x-nav-link>
+                            @endcan
+                        @else
+                            <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
+                                {{ __($item['label']) }}
+                            </x-nav-link>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -70,9 +83,17 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             @foreach (\App\Support\ErpNavigation::items() as $item)
-                <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
-                    {{ __($item['label']) }}
-                </x-responsive-nav-link>
+                @if (isset($item['gate']))
+                    @can($item['gate'])
+                        <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
+                            {{ __($item['label']) }}
+                        </x-responsive-nav-link>
+                    @endcan
+                @else
+                    <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])">
+                        {{ __($item['label']) }}
+                    </x-responsive-nav-link>
+                @endif
             @endforeach
         </div>
 

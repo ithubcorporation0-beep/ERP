@@ -61,11 +61,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'payments' => 'Payments',
         'expenses' => 'Expenses',
         'documents' => 'Documents',
+    ];
+
+    foreach ($modules as $slug => $title) {
+        Route::get("/{$slug}", fn () => view('modules.coming-soon', ['title' => $title]))
+            ->name("{$slug}.index");
+    }
+});
+
+// Admin-only modules: gated by the 'viewAdmin' Gate (ADMIN or SUPER_ADMIN),
+// matching the @can('viewAdmin') check that hides these links in the nav.
+Route::middleware(['auth', 'verified', 'can:viewAdmin'])->group(function () {
+    $adminModules = [
         'users' => 'Users',
         'settings' => 'Settings',
     ];
 
-    foreach ($modules as $slug => $title) {
+    foreach ($adminModules as $slug => $title) {
         Route::get("/{$slug}", fn () => view('modules.coming-soon', ['title' => $title]))
             ->name("{$slug}.index");
     }
