@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
 
@@ -56,9 +57,17 @@ Route::middleware(['auth', 'verified', 'role:'.Roles::CLIENT])
 Route::resource('customers', CustomerController::class)
     ->middleware(['auth', 'verified']);
 
+Route::resource('projects', ProjectController::class)
+    ->middleware(['auth', 'verified']);
+
+Route::middleware(['auth', 'verified'])->prefix('projects/{project}/members')->name('projects.members.')->group(function () {
+    Route::post('/', [ProjectController::class, 'addMember'])->name('store');
+    Route::patch('/{member}', [ProjectController::class, 'updateMemberRole'])->name('update');
+    Route::delete('/{member}', [ProjectController::class, 'removeMember'])->name('destroy');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'projects' => 'Projects',
         'tasks' => 'Tasks',
         'invoices' => 'Invoices',
         'payments' => 'Payments',

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Customer;
+use App\Models\Project;
 
 class ErpNavigation
 {
@@ -20,7 +21,7 @@ class ErpNavigation
         return [
             ['label' => 'Dashboard', 'route' => 'dashboard'],
             ['label' => 'Customers', 'route' => 'customers.index', 'gate' => 'viewAny', 'gate_arg' => Customer::class],
-            ['label' => 'Projects', 'route' => 'projects.index'],
+            ['label' => 'Projects', 'route' => 'projects.index', 'gate' => 'viewAny', 'gate_arg' => Project::class],
             ['label' => 'Tasks', 'route' => 'tasks.index'],
             ['label' => 'Invoices', 'route' => 'invoices.index'],
             ['label' => 'Payments', 'route' => 'payments.index'],

@@ -10,9 +10,8 @@ class CustomerPolicy extends BasePolicy
 {
     /**
      * ADMIN+ can manage customers; MANAGER and ACCOUNTANT can view them
-     * read-only; EMPLOYEE has no access. CLIENT access is limited to
-     * their own linked customer record, which isn't wired up yet, so
-     * CLIENT is denied here until that relationship exists.
+     * read-only; EMPLOYEE has no access. CLIENT never browses the full
+     * list, only their own linked customer (see view() below).
      */
     public function viewAny(User $user): bool
     {
@@ -29,7 +28,11 @@ class CustomerPolicy extends BasePolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        return $this->viewAny($user);
+        if ($this->viewAny($user)) {
+            return true;
+        }
+
+        return $user->hasRole(Roles::CLIENT) && $user->customer_id === $customer->id;
     }
 
     /**

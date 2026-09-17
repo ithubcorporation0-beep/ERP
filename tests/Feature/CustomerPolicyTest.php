@@ -41,3 +41,14 @@ test('create, update and delete are only allowed for ADMIN and SUPER_ADMIN', fun
     [Roles::EMPLOYEE, false],
     [Roles::CLIENT, false],
 ]);
+
+test('a CLIENT can view only their own linked customer', function () {
+    $customer = Customer::factory()->create();
+    $otherCustomer = Customer::factory()->create();
+
+    $client = User::factory()->create(['customer_id' => $customer->id]);
+    $client->assignRole(Roles::CLIENT);
+
+    expect($client->can('view', $customer))->toBeTrue()
+        ->and($client->can('view', $otherCustomer))->toBeFalse();
+});
