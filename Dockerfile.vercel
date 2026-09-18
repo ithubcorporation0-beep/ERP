@@ -17,12 +17,20 @@
 ##
 FROM dunglas/frankenphp:1-php8.4-bookworm AS base
 
+# HTTPS instead of the base image's default plain-HTTP apt sources - some
+# network paths (corporate proxies, some CI runners) only handle HTTPS
+# transparently. Debian's archive serves both; this is a strict subset of
+# what the default already trusts (same signed Release files), not a
+# weaker one.
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libicu-dev \
         libzip-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
         libfreetype6-dev \
+        libonig-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         pdo_mysql \
