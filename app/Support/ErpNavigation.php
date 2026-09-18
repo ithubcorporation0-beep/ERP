@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Customer;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Product;
@@ -32,7 +33,7 @@ class ErpNavigation
             ['label' => 'Products', 'route' => 'products.index', 'gate' => 'viewAny', 'gate_arg' => Product::class],
             ['label' => 'Invoices', 'route' => 'invoices.index', 'gate' => 'viewAny', 'gate_arg' => Invoice::class],
             ['label' => 'Payments', 'route' => 'payments.index', 'gate' => 'viewAny', 'gate_arg' => Payment::class],
-            ['label' => 'Expenses', 'route' => 'expenses.index'],
+            ['label' => 'Expenses', 'route' => 'expenses.index', 'gate' => 'viewAny', 'gate_arg' => Expense::class],
             ['label' => 'Documents', 'route' => 'documents.index'],
             ['label' => 'Users', 'route' => 'users.index', 'gate' => 'viewAdmin'],
             ['label' => 'Settings', 'route' => 'settings.index', 'gate' => 'viewAdmin'],

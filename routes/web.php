@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -104,9 +105,17 @@ Route::resource('payments', PaymentController::class)
     ->except('edit')
     ->middleware(['auth', 'verified']);
 
+Route::middleware(['auth', 'verified'])->prefix('expenses')->name('expenses.')->group(function () {
+    Route::get('/report', [ExpenseController::class, 'report'])->name('report');
+    Route::get('/export', [ExpenseController::class, 'export'])->name('export');
+});
+
+Route::resource('expenses', ExpenseController::class)
+    ->except('show')
+    ->middleware(['auth', 'verified']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'expenses' => 'Expenses',
         'documents' => 'Documents',
     ];
 

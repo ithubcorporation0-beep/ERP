@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ExpenseCategory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Expense extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'customer_id',
+        'project_id',
+        'category',
+        'amount',
+        'currency',
+        'expense_date',
+        'notes',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'category' => ExpenseCategory::class,
+            'amount' => 'decimal:2',
+            'expense_date' => 'date',
+        ];
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+}
