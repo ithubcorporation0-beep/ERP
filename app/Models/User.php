@@ -4,17 +4,20 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Concerns\Auditable;
+use App\Concerns\HasAvatar;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Auditable, HasFactory, HasRoles, Notifiable;
+    use Auditable, HasAvatar, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +29,7 @@ class User extends Authenticatable
         'email',
         'password',
         'customer_id',
+        'status',
     ];
 
     /**
@@ -48,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => UserStatus::class,
         ];
     }
 
@@ -83,13 +88,14 @@ class User extends Authenticatable
 
     /**
      * Deliberately excludes password and remember_token: role changes are
-     * audited separately (see UserController::updateRole()) since roles
-     * live in spatie/permission's pivot table, not a column here.
+     * audited separately (see UserManagementController::updateRoles())
+     * since roles live in spatie/permission's pivot table, not a column
+     * here. Status is included so suspend/activate are audited for free.
      *
      * @return array<int, string>
      */
     protected function auditableFields(): array
     {
-        return ['name', 'email', 'customer_id'];
+        return ['name', 'email', 'customer_id', 'status'];
     }
 }

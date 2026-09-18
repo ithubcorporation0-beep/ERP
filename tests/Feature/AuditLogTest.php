@@ -102,15 +102,15 @@ test('changing a user\'s role via the admin Users page logs an explicit role-cha
     $target->assignRole(Roles::EMPLOYEE);
 
     $this->actingAs($this->admin)
-        ->patch(route('users.update-role', $target), ['role' => Roles::MANAGER])
+        ->patch(route('users.update-roles', $target), ['roles' => [Roles::MANAGER]])
         ->assertRedirect();
 
     $activity = Activity::where('subject_type', User::class)->where('subject_id', $target->id)->where('event', 'updated')->latest()->first();
 
     expect($activity)->not->toBeNull()
         ->and($activity->causer_id)->toBe($this->admin->id)
-        ->and($activity->properties['old_role'])->toBe(Roles::EMPLOYEE)
-        ->and($activity->properties['new_role'])->toBe(Roles::MANAGER)
+        ->and($activity->properties['old_roles'])->toBe([Roles::EMPLOYEE])
+        ->and($activity->properties['new_roles'])->toBe([Roles::MANAGER])
         ->and($target->fresh()->hasRole(Roles::MANAGER))->toBeTrue();
 });
 

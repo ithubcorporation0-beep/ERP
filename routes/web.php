@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserManagementController;
 use App\Support\Documentable;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -137,9 +138,17 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->name('notifica
 
 // Admin-only modules: gated by the 'viewAdmin' Gate (ADMIN or SUPER_ADMIN),
 // matching the @can('viewAdmin') check that hides these links in the nav.
+// UserManagementController also enforces its own UserPolicy per action,
+// so this middleware is a first-pass gate, not the only one.
 Route::middleware(['auth', 'verified', 'can:viewAdmin'])->group(function () {
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::patch('/users/{user}/roles', [UserManagementController::class, 'updateRoles'])->name('users.update-roles');
+    Route::patch('/users/{user}/suspend', [UserManagementController::class, 'suspend'])->name('users.suspend');
+    Route::patch('/users/{user}/activate', [UserManagementController::class, 'activate'])->name('users.activate');
+    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
 
     Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
@@ -157,6 +166,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::post('/profile/avatar', [AvatarController::class, 'store'])->name('profile.avatar.store');
+    Route::delete('/profile/avatar', [AvatarController::class, 'destroy'])->name('profile.avatar.destroy');
+    Route::get('/users/{user}/avatar', [AvatarController::class, 'show'])->name('users.avatar');
 });
 
 require __DIR__.'/auth.php';
