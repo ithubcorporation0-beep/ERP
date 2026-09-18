@@ -91,7 +91,9 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($expenses as $expense)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->expense_date->format('Y-m-d') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <a href="{{ route('expenses.show', $expense) }}" class="hover:underline">{{ $expense->expense_date->format('Y-m-d') }}</a>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->category->label() }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->customer?->name ?? '—' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $expense->project?->name ?? '—' }}</td>

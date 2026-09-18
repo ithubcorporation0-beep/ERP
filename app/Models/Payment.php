@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDocuments;
 use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
 
-class Payment extends Model
+class Payment extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasDocuments, HasFactory;
 
     protected $fillable = [
         'invoice_id',

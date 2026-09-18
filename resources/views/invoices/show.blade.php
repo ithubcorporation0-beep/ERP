@@ -316,6 +316,8 @@
                     </tbody>
                 </table>
             </div>
+
+            @include('documents._panel', ['model' => $invoice, 'type' => 'invoices'])
         </div>
     </div>
 </x-app-layout>

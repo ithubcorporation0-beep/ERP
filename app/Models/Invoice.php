@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDocuments;
 use App\Enums\InvoiceDiscountType;
 use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
 
-class Invoice extends Model
+class Invoice extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasDocuments, HasFactory;
 
     protected $fillable = [
         'customer_id',

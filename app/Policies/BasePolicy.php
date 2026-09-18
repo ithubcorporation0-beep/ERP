@@ -34,6 +34,34 @@ class BasePolicy
     }
 
     /**
+     * Whether the user may upload/replace documents attached to the model.
+     * Delegates to the concrete policy's update() so document management
+     * follows the same role/ownership rules as editing the entity itself.
+     */
+    public function uploadDocuments(User $user, mixed $model): bool
+    {
+        return $this->update($user, $model);
+    }
+
+    /**
+     * Whether the user may list/download documents attached to the model.
+     * Delegates to view(), which is where each policy already encodes its
+     * CLIENT-to-own-customer scoping — no per-entity duplication needed.
+     */
+    public function downloadDocuments(User $user, mixed $model): bool
+    {
+        return $this->view($user, $model);
+    }
+
+    /**
+     * Removing a document follows the same rule as uploading one.
+     */
+    public function deleteDocuments(User $user, mixed $model): bool
+    {
+        return $this->update($user, $model);
+    }
+
+    /**
      * Scope a query to only the records the given user is allowed to see.
      *
      * SUPER_ADMIN and ADMIN bypass scoping and see every record. Everyone

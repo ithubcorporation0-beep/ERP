@@ -113,6 +113,8 @@
                     </form>
                 @endcan
             </div>
+
+            @include('documents._panel', ['model' => $task, 'type' => 'tasks'])
         </div>
     </div>
 </x-app-layout>

@@ -178,6 +178,8 @@
                     </tbody>
                 </table>
             </div>
+
+            @include('documents._panel', ['model' => $project, 'type' => 'projects'])
         </div>
     </div>
 </x-app-layout>

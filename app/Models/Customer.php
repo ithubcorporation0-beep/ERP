@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDocuments;
 use App\Enums\CustomerStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
 
-class Customer extends Model
+class Customer extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasDocuments, HasFactory;
 
     protected $fillable = [
         'name',

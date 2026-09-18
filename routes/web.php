@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TaskController;
+use App\Support\Documentable;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
 
@@ -111,19 +113,18 @@ Route::middleware(['auth', 'verified'])->prefix('expenses')->name('expenses.')->
 });
 
 Route::resource('expenses', ExpenseController::class)
-    ->except('show')
     ->middleware(['auth', 'verified']);
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    $modules = [
-        'documents' => 'Documents',
-    ];
-
-    foreach ($modules as $slug => $title) {
-        Route::get("/{$slug}", fn () => view('modules.coming-soon', ['title' => $title]))
-            ->name("{$slug}.index");
-    }
-});
+Route::middleware(['auth', 'verified'])
+    ->prefix('{type}/{id}/documents')
+    ->whereIn('type', array_keys(Documentable::map()))
+    ->whereNumber('id')
+    ->name('documents.')
+    ->group(function () {
+        Route::post('/', [DocumentController::class, 'store'])->name('store');
+        Route::get('/{media}/download', [DocumentController::class, 'download'])->name('download');
+        Route::delete('/{media}', [DocumentController::class, 'destroy'])->name('destroy');
+    });
 
 // Admin-only modules: gated by the 'viewAdmin' Gate (ADMIN or SUPER_ADMIN),
 // matching the @can('viewAdmin') check that hides these links in the nav.

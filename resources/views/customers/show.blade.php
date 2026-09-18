@@ -81,6 +81,8 @@
                 <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">{{ __('Notes') }}</h3>
                 <p class="text-sm text-gray-900 whitespace-pre-line">{{ $customer->notes ?? __('No notes.') }}</p>
             </div>
+
+            @include('documents._panel', ['model' => $customer, 'type' => 'customers'])
         </div>
     </div>
 </x-app-layout>

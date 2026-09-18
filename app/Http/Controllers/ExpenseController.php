@@ -68,6 +68,16 @@ class ExpenseController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Expense $expense): View
+    {
+        return view('expenses.show', [
+            'expense' => $expense->load(['customer', 'project']),
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Expense $expense): View

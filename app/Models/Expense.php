@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDocuments;
 use App\Enums\ExpenseCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
 
-class Expense extends Model
+class Expense extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasDocuments, HasFactory;
 
     protected $fillable = [
         'customer_id',

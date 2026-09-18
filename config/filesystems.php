@@ -38,6 +38,21 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Backs the "documents" media collection on Customer, Project, Task,
+         * Invoice, Payment, and Expense. Deliberately not listed under
+         * 'links' below, so `storage:link` never exposes it — every file
+         * on it is only reachable through DocumentController::download(),
+         * which checks the owning entity's policy before streaming.
+         */
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

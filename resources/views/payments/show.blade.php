@@ -151,6 +151,8 @@
                     </dl>
                 @endcan
             </div>
+
+            @include('documents._panel', ['model' => $payment, 'type' => 'payments'])
         </div>
     </div>
 </x-app-layout>
