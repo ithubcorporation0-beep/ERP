@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 use App\Support\Documentable;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -136,8 +138,12 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->name('notifica
 // Admin-only modules: gated by the 'viewAdmin' Gate (ADMIN or SUPER_ADMIN),
 // matching the @can('viewAdmin') check that hides these links in the nav.
 Route::middleware(['auth', 'verified', 'can:viewAdmin'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+
+    Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+
     $adminModules = [
-        'users' => 'Users',
         'settings' => 'Settings',
     ];
 

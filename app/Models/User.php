@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use Auditable, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -78,5 +79,17 @@ class User extends Authenticatable
             ->using(TaskAssignee::class)
             ->withPivot('id')
             ->withTimestamps();
+    }
+
+    /**
+     * Deliberately excludes password and remember_token: role changes are
+     * audited separately (see UserController::updateRole()) since roles
+     * live in spatie/permission's pivot table, not a column here.
+     *
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return ['name', 'email', 'customer_id'];
     }
 }

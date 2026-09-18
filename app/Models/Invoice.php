@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Concerns\HasDocuments;
 use App\Enums\InvoiceDiscountType;
 use App\Enums\InvoiceStatus;
@@ -13,7 +14,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Invoice extends Model implements HasMedia
 {
-    use HasDocuments, HasFactory;
+    use Auditable, HasDocuments, HasFactory;
 
     protected $fillable = [
         'customer_id',
@@ -67,5 +68,17 @@ class Invoice extends Model implements HasMedia
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return [
+            'customer_id', 'project_id', 'number', 'issue_date', 'due_date', 'currency',
+            'status', 'subtotal', 'discount_type', 'discount_value', 'tax_total', 'total',
+            'amount_paid', 'balance_due', 'notes',
+        ];
     }
 }

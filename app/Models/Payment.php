@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Concerns\HasDocuments;
 use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Payment extends Model implements HasMedia
 {
-    use HasDocuments, HasFactory;
+    use Auditable, HasDocuments, HasFactory;
 
     protected $fillable = [
         'invoice_id',
@@ -41,5 +42,13 @@ class Payment extends Model implements HasMedia
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return ['invoice_id', 'customer_id', 'amount', 'currency', 'method', 'reference', 'received_date', 'notes'];
     }
 }

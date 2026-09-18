@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Concerns\HasDocuments;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
@@ -13,7 +14,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Task extends Model implements HasMedia
 {
-    use HasDocuments, HasFactory;
+    use Auditable, HasDocuments, HasFactory;
 
     protected $fillable = [
         'project_id',
@@ -47,5 +48,13 @@ class Task extends Model implements HasMedia
             ->using(TaskAssignee::class)
             ->withPivot('id')
             ->withTimestamps();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return ['project_id', 'title', 'description', 'status', 'priority', 'due_date'];
     }
 }

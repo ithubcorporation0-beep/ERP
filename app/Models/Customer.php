@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Concerns\HasDocuments;
 use App\Enums\CustomerStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Customer extends Model implements HasMedia
 {
-    use HasDocuments, HasFactory;
+    use Auditable, HasDocuments, HasFactory;
 
     protected $fillable = [
         'name',
@@ -50,5 +51,13 @@ class Customer extends Model implements HasMedia
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return ['name', 'email', 'phone', 'billing_address', 'shipping_address', 'status', 'notes'];
     }
 }

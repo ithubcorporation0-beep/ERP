@@ -35,6 +35,7 @@ class ErpNavigation
             ['label' => 'Payments', 'route' => 'payments.index', 'gate' => 'viewAny', 'gate_arg' => Payment::class],
             ['label' => 'Expenses', 'route' => 'expenses.index', 'gate' => 'viewAny', 'gate_arg' => Expense::class],
             ['label' => 'Users', 'route' => 'users.index', 'gate' => 'viewAdmin'],
+            ['label' => 'Audit Log', 'route' => 'audit-log.index', 'gate' => 'viewAdmin'],
             ['label' => 'Settings', 'route' => 'settings.index', 'gate' => 'viewAdmin'],
         ];
     }

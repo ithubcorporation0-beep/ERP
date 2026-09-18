@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Concerns\HasDocuments;
 use App\Enums\ExpenseCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Expense extends Model implements HasMedia
 {
-    use HasDocuments, HasFactory;
+    use Auditable, HasDocuments, HasFactory;
 
     protected $fillable = [
         'customer_id',
@@ -40,5 +41,13 @@ class Expense extends Model implements HasMedia
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function auditableFields(): array
+    {
+        return ['customer_id', 'project_id', 'category', 'amount', 'currency', 'expense_date', 'notes'];
     }
 }

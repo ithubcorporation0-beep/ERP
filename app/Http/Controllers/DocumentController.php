@@ -7,6 +7,7 @@ use App\Notifications\DocumentUploadedNotification;
 use App\Support\Documentable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -23,6 +24,13 @@ class DocumentController extends Controller
 
         $uploaded = collect($request->file('files'))
             ->map(fn ($file) => $model->addDocument($file));
+
+        $uploaded->each(fn (Media $media) => activity()
+            ->performedOn($media)
+            ->causedBy($request->user())
+            ->withProperties(['file_name' => $media->file_name, 'size' => $media->size, 'attached_to' => $model::class.'#'.$model->id])
+            ->event('created')
+            ->log('Document uploaded'));
 
         $recipients = Documentable::documentRecipients($model, $request->user()->id);
         Notification::send($recipients, new DocumentUploadedNotification($model, $request->route('type'), $uploaded));
@@ -48,11 +56,18 @@ class DocumentController extends Controller
     /**
      * Delete a document. Authorization mirrors upload (deleteDocuments).
      */
-    public function destroy(string $type, int $id, Media $media): RedirectResponse
+    public function destroy(Request $request, string $type, int $id, Media $media): RedirectResponse
     {
         $model = $this->resolveOwnedMedia($type, $id, $media);
 
         $this->authorize('deleteDocuments', $model);
+
+        activity()
+            ->performedOn($media)
+            ->causedBy($request->user())
+            ->withProperties(['file_name' => $media->file_name, 'size' => $media->size, 'attached_to' => $model::class.'#'.$model->id])
+            ->event('deleted')
+            ->log('Document deleted');
 
         $media->delete();
 
