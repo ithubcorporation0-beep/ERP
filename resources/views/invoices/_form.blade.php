@@ -69,16 +69,13 @@
                 :value="old('discount_value', $invoice->discount_value ?? 0)" required />
             <x-input-error :messages="$errors->get('discount_value')" class="mt-2" />
         </div>
-
-        @if ($invoice->exists)
-            <div>
-                <x-input-label for="amount_paid" value="Amount Paid" />
-                <x-text-input id="amount_paid" name="amount_paid" type="number" step="0.01" min="0" class="mt-1 block w-full"
-                    :value="old('amount_paid', $invoice->amount_paid)" required />
-                <x-input-error :messages="$errors->get('amount_paid')" class="mt-2" />
-            </div>
-        @endif
     </div>
+
+    @if ($invoice->exists)
+        <p class="text-sm text-gray-500">
+            {{ __('Amount paid (:paid) is tracked via Payments, not edited here.', ['paid' => $invoice->currency.' '.number_format($invoice->amount_paid, 2)]) }}
+        </p>
+    @endif
 
     <div>
         <x-input-label for="notes" value="Notes" />

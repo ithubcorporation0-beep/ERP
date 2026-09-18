@@ -274,6 +274,48 @@
                     </div>
                 </dl>
             </div>
+
+            {{-- Payments --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">{{ __('Payments') }}</h3>
+
+                    @can('create', \App\Models\Payment::class)
+                        @if (in_array($invoice->status, [\App\Enums\InvoiceStatus::SENT, \App\Enums\InvoiceStatus::PARTIALLY_PAID], true) && $invoice->balance_due > 0)
+                            <a href="{{ route('payments.create', ['invoice_id' => $invoice->id]) }}" class="text-sm text-indigo-600 hover:text-indigo-900">
+                                {{ __('Record Payment') }}
+                            </a>
+                        @endif
+                    @endcan
+                </div>
+
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date') }}</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Method') }}</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Reference') }}</th>
+                            <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Amount') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($invoice->payments as $payment)
+                            <tr>
+                                <td class="px-3 py-2 text-sm text-gray-900">
+                                    <a href="{{ route('payments.show', $payment) }}" class="hover:underline">{{ $payment->received_date->format('Y-m-d') }}</a>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-gray-500">{{ $payment->method->label() }}</td>
+                                <td class="px-3 py-2 text-sm text-gray-500">{{ $payment->reference ?? '—' }}</td>
+                                <td class="px-3 py-2 text-right text-sm text-gray-900">{{ $payment->currency }} {{ number_format($payment->amount, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-3 py-2 text-sm text-gray-500">{{ __('No payments recorded yet.') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </x-app-layout>

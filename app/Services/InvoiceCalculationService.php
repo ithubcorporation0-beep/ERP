@@ -30,16 +30,18 @@ class InvoiceCalculationService
     }
 
     /**
-     * Recompute an invoice's subtotal, tax_total, total, and balance_due
-     * from its line items, applying the discount and clamping every
-     * total at zero. Also resolves the payment-related status
-     * (SENT / PARTIALLY_PAID / PAID) from the new balance_due — DRAFT
-     * and VOID are left untouched, since those only change via an
+     * Recompute an invoice's subtotal, tax_total, total, amount_paid,
+     * and balance_due. amount_paid is derived from the sum of the
+     * invoice's payments (the Payments module is the source of truth
+     * for it, not a manually-entered field). Applies the discount and
+     * clamps every total at zero. Also resolves the payment-related
+     * status (SENT / PARTIALLY_PAID / PAID) from the new balance_due —
+     * DRAFT and VOID are left untouched, since those only change via an
      * explicit action. Saves the invoice.
      */
     public function recalculateInvoice(Invoice $invoice): Invoice
     {
-        $invoice->load('items');
+        $invoice->load(['items', 'payments']);
 
         $subtotal = round((float) $invoice->items->sum(fn (InvoiceItem $item) => (float) $item->line_subtotal), 2);
         $taxTotal = round((float) $invoice->items->sum(fn (InvoiceItem $item) => (float) $item->line_tax), 2);
@@ -48,7 +50,7 @@ class InvoiceCalculationService
 
         $total = max(0.0, round($subtotal - $discount + $taxTotal, 2));
 
-        $amountPaid = max(0.0, (float) $invoice->amount_paid);
+        $amountPaid = max(0.0, round((float) $invoice->payments->sum(fn ($payment) => (float) $payment->amount), 2));
         $balanceDue = max(0.0, round($total - $amountPaid, 2));
 
         $invoice->subtotal = number_format($subtotal, 2, '.', '');

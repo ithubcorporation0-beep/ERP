@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\InvoiceItemType;
+use App\Enums\PaymentMethod;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Project;
@@ -14,10 +15,10 @@ use Illuminate\Database\Seeder;
 class DemoInvoiceSeeder extends Seeder
 {
     /**
-     * Seed a demo Service, a demo Product, and one demo invoice (with
-     * both a SERVICE and a PRODUCT line item, partially paid) for the
-     * demo customer created by DemoProjectsSeeder. Skipped outside the
-     * local environment.
+     * Seed a demo Service, a demo Product, one demo invoice (with both a
+     * SERVICE and a PRODUCT line item), and a partial payment against it
+     * for the demo customer created by DemoProjectsSeeder. Skipped
+     * outside the local environment.
      */
     public function run(): void
     {
@@ -81,7 +82,18 @@ class DemoInvoiceSeeder extends Seeder
             $item->save();
         }
 
-        $invoice->amount_paid = 500;
+        $calculator->recalculateInvoice($invoice);
+
+        $invoice->payments()->create([
+            'customer_id' => $invoice->customer_id,
+            'amount' => 500,
+            'currency' => $invoice->currency,
+            'method' => PaymentMethod::BANK_TRANSFER->value,
+            'reference' => 'WIRE-DEMO-001',
+            'received_date' => now()->subDays(3)->format('Y-m-d'),
+            'notes' => 'Partial payment received via wire transfer.',
+        ]);
+
         $calculator->recalculateInvoice($invoice);
     }
 }

@@ -145,3 +145,21 @@ test('destroy is only reachable for a DRAFT invoice', function () {
     $this->actingAs($this->admin)->delete(route('invoices.destroy', $draft))->assertRedirect(route('invoices.index'));
     expect(Invoice::find($draft->id))->toBeNull();
 });
+
+test('the show page lists recorded payments and offers a Record Payment link while eligible', function () {
+    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::SENT, 'total' => 100, 'balance_due' => 100]);
+
+    $this->actingAs($this->admin)
+        ->get(route('invoices.show', $invoice))
+        ->assertOk()
+        ->assertSee(route('payments.create', ['invoice_id' => $invoice->id]), false)
+        ->assertSee('No payments recorded yet.');
+
+    \App\Models\Payment::factory()->create(['invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id, 'amount' => 40, 'reference' => 'WIRE-123']);
+    app(\App\Services\InvoiceCalculationService::class)->recalculateInvoice($invoice);
+
+    $this->actingAs($this->admin)
+        ->get(route('invoices.show', $invoice))
+        ->assertOk()
+        ->assertSee('WIRE-123');
+});

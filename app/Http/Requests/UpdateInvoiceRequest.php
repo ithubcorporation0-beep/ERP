@@ -49,7 +49,6 @@ class UpdateInvoiceRequest extends FormRequest
                     }
                 },
             ],
-            'amount_paid' => ['required', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ];
     }

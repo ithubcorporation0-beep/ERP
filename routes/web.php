@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -99,9 +100,12 @@ Route::middleware(['auth', 'verified'])->prefix('invoices/{invoice}')->name('inv
     Route::get('/print', [InvoiceController::class, 'print'])->name('print');
 });
 
+Route::resource('payments', PaymentController::class)
+    ->except('edit')
+    ->middleware(['auth', 'verified']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'payments' => 'Payments',
         'expenses' => 'Expenses',
         'documents' => 'Documents',
     ];

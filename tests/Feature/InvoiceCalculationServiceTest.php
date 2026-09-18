@@ -2,8 +2,10 @@
 
 use App\Enums\InvoiceDiscountType;
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\Payment;
 use App\Services\InvoiceCalculationService;
 
 beforeEach(function () {
@@ -68,34 +70,36 @@ test('an amount discount larger than the subtotal is clamped, never producing a 
     expect((float) $invoice->total)->toBe(0.0);
 });
 
-test('balance_due is total minus amount_paid, clamped at zero', function () {
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::SENT, 'amount_paid' => 150]);
+test('amount_paid is derived from the sum of payments, and balance_due is clamped at zero even when overpaid', function () {
+    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::SENT]);
     InvoiceItem::factory()->create(['invoice_id' => $invoice->id, 'quantity' => 1, 'unit_price' => 100, 'tax_rate' => 0, 'line_subtotal' => 100, 'line_tax' => 0, 'line_total' => 100]);
+    Payment::factory()->create(['invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id, 'amount' => 150]);
 
     $this->calculator->recalculateInvoice($invoice);
 
-    // total is 100, amount_paid 150 (overpaid) -> balance_due clamped to 0, not negative
-    expect((float) $invoice->balance_due)->toBe(0.0);
+    expect((float) $invoice->amount_paid)->toBe(150.0)
+        // total is 100, payments sum to 150 (overpaid) -> balance_due clamped to 0, not negative
+        ->and((float) $invoice->balance_due)->toBe(0.0);
 });
 
-test('status transitions from SENT to PARTIALLY_PAID to PAID as amount_paid changes', function () {
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::SENT, 'amount_paid' => 0]);
+test('status transitions from SENT to PARTIALLY_PAID to PAID as payments accumulate', function () {
+    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::SENT]);
     InvoiceItem::factory()->create(['invoice_id' => $invoice->id, 'quantity' => 1, 'unit_price' => 200, 'tax_rate' => 0, 'line_subtotal' => 200, 'line_tax' => 0, 'line_total' => 200]);
 
     $this->calculator->recalculateInvoice($invoice);
     expect($invoice->status)->toBe(InvoiceStatus::SENT);
 
-    $invoice->amount_paid = 50;
+    Payment::factory()->create(['invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id, 'amount' => 50]);
     $this->calculator->recalculateInvoice($invoice);
     expect($invoice->status)->toBe(InvoiceStatus::PARTIALLY_PAID);
 
-    $invoice->amount_paid = 200;
+    Payment::factory()->create(['invoice_id' => $invoice->id, 'customer_id' => $invoice->customer_id, 'amount' => 150]);
     $this->calculator->recalculateInvoice($invoice);
     expect($invoice->status)->toBe(InvoiceStatus::PAID);
 });
 
 test('recalculateInvoice never changes a DRAFT or VOID status', function (InvoiceStatus $status) {
-    $invoice = Invoice::factory()->create(['status' => $status, 'amount_paid' => 0]);
+    $invoice = Invoice::factory()->create(['status' => $status]);
     InvoiceItem::factory()->create(['invoice_id' => $invoice->id, 'quantity' => 1, 'unit_price' => 100, 'tax_rate' => 0, 'line_subtotal' => 100, 'line_tax' => 0, 'line_total' => 100]);
 
     $this->calculator->recalculateInvoice($invoice);
