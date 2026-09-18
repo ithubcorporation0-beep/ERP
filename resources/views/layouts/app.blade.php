@@ -29,6 +29,25 @@
 
             <!-- Page Content -->
             <main>
+                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    @if (session('error'))
+                        <div class="mt-6 bg-red-50 text-red-700 text-sm rounded-md p-4">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mt-6 bg-red-50 text-red-700 text-sm rounded-md p-4">
+                            <p class="font-semibold">{{ __('Please fix the following before continuing:') }}</p>
+                            <ul class="mt-1 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+
                 {{ $slot }}
             </main>
         </div>

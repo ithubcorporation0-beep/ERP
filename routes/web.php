@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
@@ -34,37 +35,37 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'verified', 'role:'.Roles::SUPER_ADMIN])
     ->prefix('super')
     ->group(function () {
-        Route::get('/', fn () => view('roles.super'))->name('roles.super');
+        Route::get('/', [DashboardController::class, 'superAdmin'])->name('roles.super');
     });
 
 Route::middleware(['auth', 'verified', 'role:'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
     ->prefix('admin')
     ->group(function () {
-        Route::get('/', fn () => view('roles.admin'))->name('roles.admin');
+        Route::get('/', [DashboardController::class, 'admin'])->name('roles.admin');
     });
 
 Route::middleware(['auth', 'verified', 'role:'.Roles::MANAGER.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
     ->prefix('manager')
     ->group(function () {
-        Route::get('/', fn () => view('roles.manager'))->name('roles.manager');
+        Route::get('/', [DashboardController::class, 'manager'])->name('roles.manager');
     });
 
 Route::middleware(['auth', 'verified', 'role:'.Roles::ACCOUNTANT.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
     ->prefix('accountant')
     ->group(function () {
-        Route::get('/', fn () => view('roles.accountant'))->name('roles.accountant');
+        Route::get('/', [DashboardController::class, 'accountant'])->name('roles.accountant');
     });
 
 Route::middleware(['auth', 'verified', 'role:'.Roles::EMPLOYEE.'|'.Roles::MANAGER.'|'.Roles::ADMIN.'|'.Roles::SUPER_ADMIN])
     ->prefix('employee')
     ->group(function () {
-        Route::get('/', fn () => view('roles.employee'))->name('roles.employee');
+        Route::get('/', [DashboardController::class, 'employee'])->name('roles.employee');
     });
 
 Route::middleware(['auth', 'verified', 'role:'.Roles::CLIENT])
     ->prefix('client')
     ->group(function () {
-        Route::get('/', fn () => view('roles.client'))->name('roles.client');
+        Route::get('/', [DashboardController::class, 'client'])->name('roles.client');
     });
 
 Route::resource('customers', CustomerController::class)

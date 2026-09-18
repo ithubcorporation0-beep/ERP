@@ -41,7 +41,7 @@ class TaskController extends Controller
             ->when($request->filled('due_to'), fn ($query) => $query->whereDate('due_date', '<=', $request->date('due_to')))
             ->orderByRaw("CASE priority WHEN 'URGENT' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 ELSE 3 END")
             ->orderBy('due_date')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('tasks.index', [

@@ -24,7 +24,7 @@ class ProductController extends Controller
         $products = Product::query()
             ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search')->toString().'%'))
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('products.index', [

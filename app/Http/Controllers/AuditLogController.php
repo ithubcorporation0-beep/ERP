@@ -47,7 +47,7 @@ class AuditLogController extends Controller
             ->when($request->filled('date_from'), fn ($query) => $query->whereDate('created_at', '>=', $request->date('date_from')))
             ->when($request->filled('date_to'), fn ($query) => $query->whereDate('created_at', '<=', $request->date('date_to')))
             ->orderByDesc('created_at')
-            ->paginate(25)
+            ->paginate(20)
             ->withQueryString();
 
         return view('audit-log.index', [

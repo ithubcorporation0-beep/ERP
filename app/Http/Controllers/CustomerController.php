@@ -25,7 +25,7 @@ class CustomerController extends Controller
             ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search')->toString().'%'))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->toString()))
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('customers.index', [

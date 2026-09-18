@@ -40,7 +40,7 @@ class PaymentController extends Controller
             ->when($request->filled('invoice_id'), fn ($query) => $query->where('invoice_id', $request->integer('invoice_id')))
             ->when($request->filled('customer_id'), fn ($query) => $query->where('customer_id', $request->integer('customer_id')))
             ->orderByDesc('received_date')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('payments.index', [

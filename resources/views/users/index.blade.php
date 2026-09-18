@@ -38,7 +38,8 @@
                 <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap items-end gap-4">
                     <div>
                         <x-input-label for="search" value="Search by name or email" />
-                        <x-text-input id="search" name="search" type="text" class="mt-1" :value="$search" placeholder="Search users…" />
+                        <x-text-input id="search" name="search" type="text" class="mt-1" :value="$search" placeholder="Search users…"
+                            x-on:input.debounce.400ms="$el.form.requestSubmit()" />
                     </div>
 
                     <div>

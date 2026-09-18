@@ -24,7 +24,7 @@ class ServiceController extends Controller
         $services = Service::query()
             ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search')->toString().'%'))
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('services.index', [

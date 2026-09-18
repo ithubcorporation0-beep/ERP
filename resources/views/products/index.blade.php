@@ -26,7 +26,8 @@
                 <form method="GET" action="{{ route('products.index') }}" class="flex flex-wrap items-end gap-4">
                     <div>
                         <x-input-label for="search" value="Search by name" />
-                        <x-text-input id="search" name="search" type="text" class="mt-1" :value="$search" placeholder="Search products…" />
+                        <x-text-input id="search" name="search" type="text" class="mt-1" :value="$search" placeholder="Search products…"
+                            x-on:input.debounce.400ms="$el.form.requestSubmit()" />
                     </div>
 
                     <x-secondary-button type="submit">{{ __('Filter') }}</x-secondary-button>

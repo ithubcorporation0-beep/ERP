@@ -31,7 +31,7 @@ class ExpenseController extends Controller
         $expenses = $this->filteredQuery($request)
             ->with(['customer', 'project'])
             ->orderByDesc('expense_date')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('expenses.index', [

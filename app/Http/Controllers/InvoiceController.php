@@ -45,7 +45,7 @@ class InvoiceController extends Controller
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->toString()))
             ->when($request->filled('customer_id'), fn ($query) => $query->where('customer_id', $request->integer('customer_id')))
             ->orderByDesc('issue_date')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         return view('invoices.index', [
