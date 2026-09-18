@@ -2,13 +2,6 @@
 
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('admin-only nav items are hidden from a non-admin role', function () {
     $employee = User::factory()->create();

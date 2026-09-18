@@ -3,13 +3,6 @@
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('admin can list, search, create, update and delete a service', function () {
     $admin = User::factory()->create();

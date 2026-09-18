@@ -4,13 +4,6 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('viewAny is allowed for SUPER_ADMIN, ADMIN, ACCOUNTANT, MANAGER, CLIENT and denied for EMPLOYEE', function (string $role, bool $expected) {
     $user = User::factory()->create();

@@ -3,13 +3,6 @@
 use App\Models\User;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('viewAdmin gate allows ADMIN and SUPER_ADMIN and denies everyone else', function (string $role, bool $expected) {
     $user = User::factory()->create();

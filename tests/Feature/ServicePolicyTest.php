@@ -3,13 +3,6 @@
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('viewAny is allowed for SUPER_ADMIN, ADMIN, MANAGER, ACCOUNTANT and denied for EMPLOYEE and CLIENT', function (string $role, bool $expected) {
     $user = User::factory()->create();

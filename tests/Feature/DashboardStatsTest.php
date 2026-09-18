@@ -11,13 +11,6 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('the super admin dashboard shows organization-wide counts', function () {
     $superAdmin = User::factory()->create();

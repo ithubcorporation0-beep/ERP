@@ -4,13 +4,6 @@ use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskAssignedNotification;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('a user only sees their own notifications on the index page', function () {
     $task = Task::factory()->create();

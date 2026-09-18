@@ -2,13 +2,6 @@
 
 use App\Models\User;
 use App\Support\Roles;
-use Spatie\Permission\Models\Role;
-
-beforeEach(function () {
-    foreach (Roles::ALL as $role) {
-        Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-    }
-});
 
 test('login redirects each role to its own dashboard', function (string $role, string $path) {
     $user = User::factory()->create();
