@@ -15,10 +15,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Every user the factory default creates (this one included) gets
+        // Laravel's well-known default password ("password") - fine for
+        // local dev, never something to leave sitting in a real database.
+        // RolesAndAdminSeeder/DemoProjectsSeeder/DemoInvoiceSeeder below
+        // already guard their own demo data the same way.
+        if (app()->environment('local')) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
 
         $this->call([
             RolesAndAdminSeeder::class,

@@ -1,0 +1,48 @@
+# Never bake secrets or local state into the image.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+.github
+
+# Rebuilt fresh inside the image by composer/npm.
+vendor
+node_modules
+public/build
+public/hot
+public/storage
+
+# Local runtime state - lives in a volume in production, not in the image.
+storage/*.key
+storage/app/*
+!storage/app/.gitignore
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/testing/.gitignore
+!storage/framework/views/.gitignore
+!storage/logs/.gitignore
+database/database.sqlite
+
+# Editor/OS noise and docs not needed at runtime.
+.idea
+.vscode
+.fleet
+.nova
+.zed
+.DS_Store
+*.log
+README.md
+DEPLOY.md
+
+# Test-only artifacts.
+tests
+.phpunit.cache
+.phpunit.result.cache
+phpunit.xml
