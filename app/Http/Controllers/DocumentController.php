@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
 {
@@ -44,13 +45,16 @@ class DocumentController extends Controller
      * the resolved entity, closing off cross-entity IDOR via a guessed
      * media id under an unrelated {type}/{id}.
      */
-    public function download(string $type, int $id, Media $media): BinaryFileResponse
+    public function download(string $type, int $id, Media $media): StreamedResponse
     {
         $model = $this->resolveOwnedMedia($type, $id, $media);
 
         $this->authorize('downloadDocuments', $model);
 
-        return response()->download($media->getPath(), $media->file_name);
+        // Storage::disk(...)->download() streams via Flysystem rather than
+        // assuming a real local path, so this works the same whether the
+        // 'private' disk is local (Sail/dev) or s3 (e.g. Cloudflare R2).
+        return Storage::disk($media->disk)->download($media->getPathRelativeToRoot(), $media->file_name);
     }
 
     /**

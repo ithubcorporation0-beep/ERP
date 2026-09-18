@@ -6,9 +6,10 @@ use App\Models\Setting;
 use App\Support\SettingKeys;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Admin-only app settings (company profile + invoice numbering/currency
@@ -78,12 +79,14 @@ class SettingController extends Controller
      * public URL only because it lives on the same private disk as
      * every other upload in this app.
      */
-    public function showLogo(): BinaryFileResponse
+    public function showLogo(): StreamedResponse
     {
         $logo = Setting::where('key', SettingKeys::COMPANY_LOGO)->first()?->getFirstMedia('logo');
 
         abort_unless($logo, 404);
 
-        return response()->file($logo->getPath());
+        // Streams via Flysystem rather than assuming a real local path, so
+        // this works the same whether the 'private' disk is local or s3.
+        return Storage::disk($logo->disk)->response($logo->getPathRelativeToRoot());
     }
 }

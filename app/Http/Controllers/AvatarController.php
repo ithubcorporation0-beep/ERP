@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Avatars live on the private disk like every other upload in this app, so
@@ -14,13 +15,16 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class AvatarController extends Controller
 {
-    public function show(Request $request, User $user): BinaryFileResponse
+    public function show(Request $request, User $user): StreamedResponse
     {
         $avatar = $user->avatar();
 
         abort_unless($avatar, 404);
 
-        return response()->file($avatar->getPath());
+        // Storage::disk(...)->response() streams via Flysystem rather than
+        // assuming a real local path, so this works the same whether the
+        // 'private' disk is local (Sail/dev) or s3 (e.g. Cloudflare R2).
+        return Storage::disk($avatar->disk)->response($avatar->getPathRelativeToRoot());
     }
 
     public function store(Request $request): RedirectResponse

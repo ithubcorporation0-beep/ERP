@@ -1,0 +1,106 @@
+# syntax=docker/dockerfile:1
+#
+# Vercel-specific build: a container-backed Vercel Function running
+# FrankenPHP (PHP + the Caddy web server, one process, no PHP-FPM/Nginx
+# split needed). This is Vercel's own documented path for a stateful PHP
+# app like Laravel - see DEPLOY-VERCEL.md for the full picture, especially
+# the parts that are NOT solved by this file alone (the database and file
+# storage both have to be external services; there's no local disk here).
+#
+# This is a second, independent build target from the main Dockerfile
+# (which targets a normal Docker host/VPS via docker-compose.prod.yml) -
+# picked by filename via vercel.json's `entrypoint`, not by Vercel reading
+# the plain `Dockerfile`.
+
+##
+## Stage 1: base runtime image + PHP extensions this app actually needs.
+##
+FROM dunglas/frankenphp:1-php8.4-bookworm AS base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libicu-dev \
+        libzip-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        pdo_mysql \
+        mbstring \
+        exif \
+        bcmath \
+        gd \
+        zip \
+        intl \
+        opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+COPY docker/php/production.ini /usr/local/etc/php/conf.d/zz-app.ini
+
+WORKDIR /app
+
+##
+## Stage 2: front-end build (npm ci && npm run build) - independent of the
+## PHP stages, same as the main Dockerfile's frontend stage.
+##
+FROM node:20-alpine AS frontend
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+##
+## Stage 3: composer install + Laravel's own build-time optimizations.
+##
+FROM base AS dependencies
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --no-interaction
+
+COPY --from=frontend /app/public/build ./public/build
+COPY . .
+
+# A throwaway key, build-scope only - just so artisan can boot far enough
+# to compile views/events below. Discarded when this stage ends; never
+# lands in the runtime image. The real APP_KEY is set once in the Vercel
+# project's env vars (see DEPLOY-VERCEL.md) and must never change after
+# the first deploy.
+ARG APP_KEY=base64:0000000000000000000000000000000000000000=
+ENV APP_KEY=${APP_KEY}
+
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
+
+# Only cache what doesn't depend on runtime secrets (APP_KEY, DB
+# credentials) that Vercel injects at container start, not at this build
+# step - config:cache/route:cache are deliberately skipped so a redeploy
+# never freezes in a stale or missing value from the build environment.
+RUN php artisan event:cache \
+    && php artisan view:cache
+
+##
+## Stage 4: runtime image actually shipped to Vercel.
+##
+FROM base AS runtime
+
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY --from=dependencies --chown=www-data:www-data /app /app
+
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV LOG_CHANNEL=stderr
+ENV PRIVATE_FILESYSTEM_DRIVER=s3
+
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R ug+rwX storage bootstrap/cache
+
+EXPOSE 80
+
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

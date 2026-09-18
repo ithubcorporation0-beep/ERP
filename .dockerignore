@@ -40,6 +40,7 @@ database/database.sqlite
 *.log
 README.md
 DEPLOY.md
+DEPLOY-VERCEL.md
 
 # Test-only artifacts.
 tests

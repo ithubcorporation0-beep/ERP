@@ -71,6 +71,22 @@ test('a file over 20MB is rejected', function () {
     expect($customer->fresh()->documents())->toHaveCount(0);
 });
 
+test('a downloaded document is byte-identical to what was uploaded, forcing an attachment disposition', function () {
+    $customer = Customer::factory()->create();
+    $original = UploadedFile::fake()->createWithContent('contract.pdf', 'the actual contract text');
+
+    $this->actingAs($this->admin)
+        ->post(route('documents.store', ['type' => 'customers', 'id' => $customer->id]), ['files' => [$original]]);
+    $media = $customer->fresh()->documents()->first();
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('documents.download', ['type' => 'customers', 'id' => $customer->id, 'media' => $media->id]));
+
+    $response->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename=contract.pdf');
+    expect($response->streamedContent())->toBe('the actual contract text');
+});
+
 test('a client can download a document on their own invoice but not on another customer\'s invoice', function () {
     $customer = Customer::factory()->create();
     $otherCustomer = Customer::factory()->create();

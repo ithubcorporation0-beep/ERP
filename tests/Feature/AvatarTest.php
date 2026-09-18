@@ -81,6 +81,20 @@ test('a user can remove their avatar', function () {
     expect($user->fresh()->avatar())->toBeNull();
 });
 
+test('the served avatar is byte-identical to what was uploaded, with the correct content type', function () {
+    $user = User::factory()->create();
+    $original = UploadedFile::fake()->image('me.jpg', 200, 200);
+    $originalBytes = file_get_contents($original->getPathname());
+
+    $this->actingAs($user)->post(route('profile.avatar.store'), ['avatar' => $original]);
+
+    $response = $this->actingAs($user)->get(route('users.avatar', $user));
+
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'image/jpeg');
+    expect($response->streamedContent())->toBe($originalBytes);
+});
+
 test('any authenticated user can view another user\'s avatar', function () {
     $owner = User::factory()->create();
     $viewer = User::factory()->create();

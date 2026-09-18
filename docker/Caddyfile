@@ -1,0 +1,14 @@
+{
+	frankenphp
+	order php_server before file_server
+}
+
+# Vercel's port contract: the platform tells the container which port to
+# listen on via $PORT, defaulting to 80 if it isn't set (e.g. running this
+# image locally with `docker run -p 8080:80 ...`).
+:{$PORT:80} {
+	root * public
+	encode gzip
+
+	php_server
+}

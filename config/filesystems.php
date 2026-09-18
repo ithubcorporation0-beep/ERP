@@ -40,12 +40,36 @@ return [
 
         /*
          * Backs the "documents" media collection on Customer, Project, Task,
-         * Invoice, Payment, and Expense. Deliberately not listed under
-         * 'links' below, so `storage:link` never exposes it — every file
-         * on it is only reachable through DocumentController::download(),
-         * which checks the owning entity's policy before streaming.
+         * Invoice, Payment, and Expense, plus avatars and the company logo.
+         * Deliberately not listed under 'links' below, so `storage:link`
+         * never exposes it — every file on it is only reachable through an
+         * authenticated, policy-checked controller action (see
+         * DocumentController::download(), AvatarController::show(),
+         * SettingController::showLogo()), which stream it via
+         * Response::macro('media', ...) (registered in AppServiceProvider)
+         * rather than assuming a real local path, so this disk works
+         * identically on 'local' or 's3'.
+         *
+         * Defaults to 'local' (Sail/dev/every environment this app has run
+         * in so far). Set PRIVATE_FILESYSTEM_DRIVER=s3 for a deployment
+         * target with no durable local disk (e.g. Vercel's container
+         * Functions) - point the AWS_* vars below at any S3-compatible
+         * provider, Cloudflare R2 included (AWS_DEFAULT_REGION=auto,
+         * AWS_USE_PATH_STYLE_ENDPOINT=true, AWS_ENDPOINT=
+         * https://<account_id>.r2.cloudflarestorage.com).
          */
-        'private' => [
+        'private' => env('PRIVATE_FILESYSTEM_DRIVER', 'local') === 's3' ? [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION', 'auto'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ] : [
             'driver' => 'local',
             'root' => storage_path('app/private'),
             'visibility' => 'private',
