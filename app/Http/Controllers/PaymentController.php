@@ -9,11 +9,13 @@ use App\Http\Requests\UpdatePaymentRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\PaymentRecordedNotification;
 use App\Policies\PaymentPolicy;
 use App\Services\InvoiceCalculationService;
 use App\Support\Roles;
+use App\Support\SettingKeys;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +66,7 @@ class PaymentController extends Controller
             'invoices' => $eligibleInvoices,
             'methods' => PaymentMethod::cases(),
             'selectedInvoiceId' => $request->integer('invoice_id') ?: null,
+            'defaultCurrency' => Setting::get(SettingKeys::DEFAULT_CURRENCY, 'USD'),
         ]);
     }
 

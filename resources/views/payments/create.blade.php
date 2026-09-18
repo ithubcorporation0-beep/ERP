@@ -42,7 +42,7 @@
                                 <div>
                                     <x-input-label for="currency" value="Currency" />
                                     <x-text-input id="currency" name="currency" type="text" maxlength="3" class="mt-1 block w-full uppercase"
-                                        :value="old('currency', 'USD')" required />
+                                        :value="old('currency', $defaultCurrency)" required />
                                     <x-input-error :messages="$errors->get('currency')" class="mt-2" />
                                 </div>
                             </div>

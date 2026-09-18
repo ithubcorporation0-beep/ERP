@@ -16,9 +16,11 @@ use App\Models\Service;
 use App\Models\User;
 use App\Notifications\InvoiceCreatedNotification;
 use App\Policies\InvoicePolicy;
+use App\Models\Setting;
 use App\Services\InvoiceCalculationService;
 use App\Services\InvoiceNumberGenerator;
 use App\Support\Roles;
+use App\Support\SettingKeys;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -65,6 +67,7 @@ class InvoiceController extends Controller
             'customers' => Customer::orderBy('name')->get(),
             'projects' => Project::orderBy('name')->get(),
             'discountTypes' => InvoiceDiscountType::cases(),
+            'defaultCurrency' => Setting::get(SettingKeys::DEFAULT_CURRENCY, 'USD'),
         ]);
     }
 
@@ -111,6 +114,7 @@ class InvoiceController extends Controller
             'customers' => Customer::orderBy('name')->get(),
             'projects' => Project::orderBy('name')->get(),
             'discountTypes' => InvoiceDiscountType::cases(),
+            'defaultCurrency' => Setting::get(SettingKeys::DEFAULT_CURRENCY, 'USD'),
         ]);
     }
 

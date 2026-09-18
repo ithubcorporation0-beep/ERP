@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Project;
+use App\Models\Setting;
+use App\Support\SettingKeys;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,6 +55,7 @@ class ExpenseController extends Controller
             'categories' => ExpenseCategory::cases(),
             'customers' => Customer::orderBy('name')->get(),
             'projects' => Project::orderBy('name')->get(),
+            'defaultCurrency' => Setting::get(SettingKeys::DEFAULT_CURRENCY, 'USD'),
         ]);
     }
 
@@ -87,6 +90,7 @@ class ExpenseController extends Controller
             'categories' => ExpenseCategory::cases(),
             'customers' => Customer::orderBy('name')->get(),
             'projects' => Project::orderBy('name')->get(),
+            'defaultCurrency' => Setting::get(SettingKeys::DEFAULT_CURRENCY, 'USD'),
         ]);
     }
 

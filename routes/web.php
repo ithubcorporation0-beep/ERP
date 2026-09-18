@@ -12,6 +12,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserManagementController;
 use App\Support\Documentable;
@@ -152,14 +153,10 @@ Route::middleware(['auth', 'verified', 'can:viewAdmin'])->group(function () {
 
     Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
-    $adminModules = [
-        'settings' => 'Settings',
-    ];
-
-    foreach ($adminModules as $slug => $title) {
-        Route::get("/{$slug}", fn () => view('modules.coming-soon', ['title' => $title]))
-            ->name("{$slug}.index");
-    }
+    Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
+    Route::patch('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/logo', [SettingController::class, 'storeLogo'])->name('settings.logo.store');
+    Route::delete('/settings/logo', [SettingController::class, 'destroyLogo'])->name('settings.logo.destroy');
 });
 
 Route::middleware('auth')->group(function () {
@@ -170,6 +167,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/avatar', [AvatarController::class, 'store'])->name('profile.avatar.store');
     Route::delete('/profile/avatar', [AvatarController::class, 'destroy'])->name('profile.avatar.destroy');
     Route::get('/users/{user}/avatar', [AvatarController::class, 'show'])->name('users.avatar');
+
+    Route::get('/settings/logo', [SettingController::class, 'showLogo'])->name('settings.logo.show');
 });
 
 require __DIR__.'/auth.php';
