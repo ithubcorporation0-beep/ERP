@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -86,9 +87,20 @@ Route::resource('products', ProductController::class)
     ->except('show')
     ->middleware(['auth', 'verified']);
 
+Route::resource('invoices', InvoiceController::class)
+    ->middleware(['auth', 'verified']);
+
+Route::middleware(['auth', 'verified'])->prefix('invoices/{invoice}')->name('invoices.')->group(function () {
+    Route::post('/items', [InvoiceController::class, 'addItem'])->name('items.store');
+    Route::patch('/items/{item}', [InvoiceController::class, 'updateItem'])->name('items.update');
+    Route::delete('/items/{item}', [InvoiceController::class, 'removeItem'])->name('items.destroy');
+    Route::post('/mark-sent', [InvoiceController::class, 'markSent'])->name('mark-sent');
+    Route::post('/mark-void', [InvoiceController::class, 'markVoid'])->name('mark-void');
+    Route::get('/print', [InvoiceController::class, 'print'])->name('print');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     $modules = [
-        'invoices' => 'Invoices',
         'payments' => 'Payments',
         'expenses' => 'Expenses',
         'documents' => 'Documents',
