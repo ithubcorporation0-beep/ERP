@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Policies\NotificationPolicy;
 use App\Support\Roles;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -27,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAdmin', function ($user) {
             return $user->hasAnyRole([Roles::ADMIN, Roles::SUPER_ADMIN]);
         });
+
+        // DatabaseNotification is a framework class, so it isn't picked up
+        // by Laravel's App\Models -> App\Policies naming convention.
+        Gate::policy(DatabaseNotification::class, NotificationPolicy::class);
 
         Request::macro('currentRole', function () {
             /** @var Request $this */

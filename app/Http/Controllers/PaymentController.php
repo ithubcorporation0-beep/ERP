@@ -9,11 +9,15 @@ use App\Http\Requests\UpdatePaymentRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\User;
+use App\Notifications\PaymentRecordedNotification;
 use App\Policies\PaymentPolicy;
 use App\Services\InvoiceCalculationService;
+use App\Support\Roles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
@@ -78,6 +82,9 @@ class PaymentController extends Controller
 
             return $payment;
         });
+
+        $recipients = User::role([Roles::SUPER_ADMIN, Roles::ADMIN, Roles::ACCOUNTANT])->get();
+        Notification::send($recipients, new PaymentRecordedNotification($payment));
 
         return redirect()->route('payments.show', $payment)
             ->with('status', 'Payment recorded.');

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDocumentRequest;
+use App\Notifications\DocumentUploadedNotification;
 use App\Support\Documentable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Notification;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -19,9 +21,11 @@ class DocumentController extends Controller
     {
         $model = $request->documentable();
 
-        foreach ($request->file('files') as $file) {
-            $model->addDocument($file);
-        }
+        $uploaded = collect($request->file('files'))
+            ->map(fn ($file) => $model->addDocument($file));
+
+        $recipients = Documentable::documentRecipients($model, $request->user()->id);
+        Notification::send($recipients, new DocumentUploadedNotification($model, $request->route('type'), $uploaded));
 
         return back()->with('status', 'Document(s) uploaded.');
     }

@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Notifications\TaskAssignedNotification;
 use App\Policies\TaskPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -163,6 +164,8 @@ class TaskController extends Controller
         ]);
 
         $task->assignees()->attach($data['user_id']);
+
+        User::find($data['user_id'])->notify(new TaskAssignedNotification($task));
 
         return back()->with('status', 'Assignee added.');
     }

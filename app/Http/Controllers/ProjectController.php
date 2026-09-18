@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
+use App\Notifications\ProjectMemberAddedNotification;
 use App\Policies\ProjectPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -137,6 +138,8 @@ class ProjectController extends Controller
         ]);
 
         $project->members()->create($data);
+
+        User::find($data['user_id'])->notify(new ProjectMemberAddedNotification($project, ProjectMemberRole::from($data['role'])));
 
         return back()->with('status', 'Member added.');
     }

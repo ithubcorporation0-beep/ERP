@@ -13,11 +13,15 @@ use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\Service;
+use App\Models\User;
+use App\Notifications\InvoiceCreatedNotification;
 use App\Policies\InvoicePolicy;
 use App\Services\InvoiceCalculationService;
 use App\Services\InvoiceNumberGenerator;
+use App\Support\Roles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\View\View;
 
@@ -74,6 +78,9 @@ class InvoiceController extends Controller
         $data['status'] = InvoiceStatus::DRAFT;
 
         $invoice = Invoice::create($data);
+
+        $clientUsers = User::role(Roles::CLIENT)->where('customer_id', $invoice->customer_id)->get();
+        Notification::send($clientUsers, new InvoiceCreatedNotification($invoice));
 
         return redirect()->route('invoices.show', $invoice)
             ->with('status', 'Invoice created.');

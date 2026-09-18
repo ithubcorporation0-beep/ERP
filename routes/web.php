@@ -4,6 +4,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -125,6 +126,12 @@ Route::middleware(['auth', 'verified'])
         Route::get('/{media}/download', [DocumentController::class, 'download'])->name('download');
         Route::delete('/{media}', [DocumentController::class, 'destroy'])->name('destroy');
     });
+
+Route::middleware(['auth', 'verified'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+});
 
 // Admin-only modules: gated by the 'viewAdmin' Gate (ADMIN or SUPER_ADMIN),
 // matching the @can('viewAdmin') check that hides these links in the nav.
