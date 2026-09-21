@@ -101,6 +101,15 @@ Settings → Environment Variables), scoped to Production:
 
 ```
 APP_KEY=                     # see below - generate once, never rotate
+APP_URL=                     # your deployment's actual https:// URL, e.g.
+                              # https://erp-xxxx.vercel.app or a custom
+                              # domain - without this, Laravel guesses the
+                              # URL from the request, and since the app sees
+                              # plain HTTP from Vercel's TLS-terminating
+                              # edge, it can generate http:// asset/form
+                              # URLs on an https:// page (blocked as mixed
+                              # content). Update this if you attach a custom
+                              # domain later.
 DB_CONNECTION=mysql          # or pgsql - see step 2
 DB_HOST=
 DB_PORT=3306                 # 5432 (or 6543 for Supabase's pooler) for pgsql
@@ -150,6 +159,15 @@ build-time `APP_KEY` used solely so `artisan` can boot far enough to run
 final image).
 
 ## 5. First-time setup
+
+**Do this before visiting the deployed URL at all.** `SESSION_DRIVER` and
+`CACHE_STORE` both default to `database` (step 3), and Laravel's session
+middleware runs on every single page - including the homepage and the
+login page - so with no `sessions` table yet, the very first request to
+any page 500s. This isn't a code bug to debug; it just means step 5
+hasn't been run yet. (Confirms which one you're looking at: `/up`, the
+health-check route, doesn't touch the database, so it stays 200 even
+before migrations run - if `/` 500s but `/up` returns 200, this is it.)
 
 Vercel doesn't run migrations for you, and **migrations should never run
 automatically at container startup** here - multiple instances can start
