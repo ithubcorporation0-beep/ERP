@@ -56,6 +56,7 @@ RUN apk add --no-cache \
         freetype \
         libzip \
         icu-libs \
+        libpq \
     && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
         libpng-dev \
@@ -63,9 +64,12 @@ RUN apk add --no-cache \
         freetype-dev \
         libzip-dev \
         icu-dev \
+        postgresql-dev \
+        oniguruma-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         pdo_mysql \
+        pdo_pgsql \
         mbstring \
         exif \
         pcntl \

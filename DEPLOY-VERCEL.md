@@ -23,8 +23,10 @@ running the same deployment. Two things in this app depend on durable
 local state, so both had to move to external services before this can
 work at all:
 
-1. **The database.** Vercel doesn't host MySQL. You need an external
-   managed MySQL host (you said you already have one - see step 2).
+1. **The database.** Vercel doesn't host a database at all. You need an
+   external one - either MySQL, or Postgres (Supabase, for instance -
+   see step 2, both are supported and actually verified against a real
+   Postgres, not just assumed compatible).
 2. **File uploads** (avatars, documents, the company logo). These used to
    live on `storage/app/private` and be served with
    `response()->file(...)`, which only works against a real local path.
@@ -55,12 +57,42 @@ deploy target, chosen entirely by env vars.
    - `AWS_ENDPOINT` - `https://<account_id>.r2.cloudflarestorage.com`
      (find `<account_id>` on the R2 dashboard's overview page).
 
-## 2. Point at your MySQL host
+## 2. Point at your database
 
-Add the matching PHP extension if your host isn't MySQL-compatible on
-the wire (it already installs `pdo_mysql` in `Dockerfile.vercel`, which
-covers MySQL, MariaDB, PlanetScale, etc.). You'll need `DB_HOST`,
-`DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` for step 4.
+`Dockerfile.vercel` installs both `pdo_mysql` and `pdo_pgsql`, so either
+works with no code changes - this was actually verified against a real
+Postgres container (not just assumed compatible because "Laravel
+supports both"), which caught and fixed one real migration bug along the
+way (a `text`→`json` column change on the `settings` table that needed a
+Postgres-specific `USING` cast).
+
+**MySQL** (MySQL, MariaDB, PlanetScale, etc.): you need `DB_HOST`,
+`DB_PORT` (usually 3306), `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` for
+step 3, and `DB_CONNECTION=mysql`.
+
+**Postgres** (Supabase, Neon, RDS, etc.): same five values, but
+`DB_CONNECTION=pgsql` and `DB_PORT` is usually 5432. For **Supabase
+specifically**: its dashboard's "Connect" panel gives you a single
+connection string like
+
+```
+postgresql://postgres:[YOUR-PASSWORD]@db.<project-ref>.supabase.co:5432/postgres
+```
+
+which maps onto the individual vars as `DB_HOST=db.<project-ref>.supabase.co`,
+`DB_PORT=5432`, `DB_DATABASE=postgres`, `DB_USERNAME=postgres`,
+`DB_PASSWORD=<YOUR-PASSWORD>`. Prefer Supabase's **connection pooler**
+over that direct connection for this deploy target specifically: Vercel
+container Functions can spin up many short-lived instances under load,
+and a direct Postgres connection has a low, fixed connection limit that
+pooled serverless traffic can exhaust fast. The same "Connect" panel has
+a pooler connection string (port `6543`, host has `pooler` in it) - use
+its host/port instead of the direct one, keep `DB_DATABASE`/`DB_USERNAME`/
+`DB_PASSWORD` the same.
+
+If you pasted a real database password anywhere outside this app's own
+env vars (a chat, a doc, etc.), reset it first - Supabase: Database →
+Settings → "Reset database password".
 
 ## 3. Set environment variables in the Vercel project
 
@@ -69,9 +101,9 @@ Settings → Environment Variables), scoped to Production:
 
 ```
 APP_KEY=                     # see below - generate once, never rotate
-DB_CONNECTION=mysql
+DB_CONNECTION=mysql          # or pgsql - see step 2
 DB_HOST=
-DB_PORT=3306
+DB_PORT=3306                 # 5432 (or 6543 for Supabase's pooler) for pgsql
 DB_DATABASE=
 DB_USERNAME=
 DB_PASSWORD=
@@ -130,6 +162,8 @@ against the same DB credentials from step 3:
 DB_CONNECTION=mysql DB_HOST=... DB_DATABASE=... DB_USERNAME=... DB_PASSWORD=... \
   php artisan migrate --force
 ```
+
+(`DB_CONNECTION=pgsql` and the matching host/port for Postgres/Supabase.)
 
 Then seed roles only (not a blanket `db:seed` - see `DEPLOY.md` for why:
 `DatabaseSeeder`'s demo data is guarded behind `local` and won't run

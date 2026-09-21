@@ -26,9 +26,18 @@ return new class extends Migration
             }
         });
 
-        Schema::table('settings', function (Blueprint $table) {
-            $table->json('value')->nullable()->change();
-        });
+        // Postgres refuses to implicitly cast an existing text column to
+        // json (it has no idea every row is now valid JSON, even though
+        // the loop above just guaranteed it) - it needs an explicit USING
+        // clause, which Blueprint::change() doesn't generate for any
+        // driver. MySQL and SQLite both accept the plain type change.
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE settings ALTER COLUMN value TYPE json USING value::json');
+        } else {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->json('value')->nullable()->change();
+            });
+        }
     }
 
     /**
@@ -36,8 +45,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('settings', function (Blueprint $table) {
-            $table->text('value')->nullable()->change();
-        });
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE settings ALTER COLUMN value TYPE text USING value::text');
+        } else {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->text('value')->nullable()->change();
+            });
+        }
     }
 };
