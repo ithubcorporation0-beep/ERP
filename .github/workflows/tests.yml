@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - '*.x'
+      - claude/intelligent-hypatia-gxj9ma
   pull_request:
   schedule:
     - cron: '0 0 * * *'
@@ -18,8 +19,14 @@ jobs:
 
     strategy:
       fail-fast: true
+      # This app only ever targets PHP 8.4 (both Dockerfile and
+      # Dockerfile.vercel pin php:8.4/dunglas/frankenphp:*-php8.4-*), so a
+      # multi-version matrix here tests versions this app doesn't actually
+      # run on. composer.lock's resolved dependency graph now requires
+      # 8.4+ too (see composer.json's `php` constraint), so 8.2/8.3 jobs
+      # would fail on `composer install` regardless.
       matrix:
-        php: [8.2, 8.3, 8.4]
+        php: [8.4]
 
     name: PHP ${{ matrix.php }}
 
